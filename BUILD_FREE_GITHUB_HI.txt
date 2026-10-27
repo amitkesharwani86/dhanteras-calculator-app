@@ -1,0 +1,16 @@
+Shivlakhan Bartan Calculator — APK build steps
+
+IMPORTANT: This ZIP is the Android source project + build workflow, not a compiled APK.
+The workflow is updated to install specific Android SDK packages instead of the invalid "tools" package.
+
+1. Extract this ZIP on your computer.
+2. Create/open your GitHub repository.
+3. Upload the CONTENTS of the ShivlakhanBartanAndroid folder (including the hidden .github folder) to the repository root.
+4. Open the Actions tab.
+5. Select "Build Shivlakhan Bartan APK" and click Run workflow.
+6. Wait for a green Success result.
+7. Open that workflow run, scroll to Artifacts, and download Shivlakhan-Bartan-Calculator-APK.
+8. Extract the downloaded artifact ZIP. It contains app-debug.apk.
+9. Transfer app-debug.apk to your Android phone and install it.
+
+If it fails, open the failed build job and share the FIRST actual error lines, not just warnings.

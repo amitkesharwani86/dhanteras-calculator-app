@@ -1,0 +1,5 @@
+Upload this ZIP to https://newly.app/apk-builder#build
+Bundle Identifier: com.shivlakhan.bartan
+Project type: Native Android Kotlin / Gradle
+Gradle distribution configured: 8.9; Android Gradle Plugin: 8.7.3
+This project uses the Gradle installation supplied by the cloud builder through gradlew, so it does not need gradle-wrapper.jar in the ZIP.
