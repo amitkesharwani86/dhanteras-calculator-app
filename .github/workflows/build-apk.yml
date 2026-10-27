@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
 
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -23,24 +27,75 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: "platform-tools,platforms;android-35,build-tools;35.0.0"
+      - name: Locate Android SDK Manager
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" \
+            -type f -name sdkmanager | sort | tail -n 1)"
+
+          if [ -z "$SDKMANAGER" ]; then
+            echo "Android SDK Manager not found."
+            exit 1
+          fi
+
+          echo "SDKMANAGER=$SDKMANAGER" >> "$GITHUB_ENV"
+          echo "Found SDK Manager: $SDKMANAGER"
+
+      - name: Accept Android SDK licenses
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | "$SDKMANAGER" \
+            --sdk_root="$ANDROID_HOME" \
+            --licenses || true
+
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          "$SDKMANAGER" \
+            --sdk_root="$ANDROID_HOME" \
+            --install \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
+      - name: Verify Android SDK
+        shell: bash
+        run: |
+          test -d "$ANDROID_HOME/platforms/android-35"
+          test -d "$ANDROID_HOME/build-tools/35.0.0"
+          test -x "$ANDROID_HOME/platform-tools/adb"
+          echo "Android SDK packages verified."
 
       - name: Download Gradle 8.9
+        shell: bash
         run: |
-          curl -fsSL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip
+          set -euo pipefail
+          curl -fsSL \
+            https://services.gradle.org/distributions/gradle-8.9-bin.zip \
+            -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
 
       - name: Verify project files
+        shell: bash
         run: |
+          set -euo pipefail
           test -f settings.gradle.kts -o -f settings.gradle
           test -f app/build.gradle.kts -o -f app/build.gradle
+          echo "Android project files found."
 
       - name: Build debug APK
+        shell: bash
         run: |
-          /tmp/gradle-8.9/bin/gradle --no-daemon --stacktrace assembleDebug
+          set -euo pipefail
+          /tmp/gradle-8.9/bin/gradle \
+            --no-daemon \
+            --stacktrace \
+            assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
