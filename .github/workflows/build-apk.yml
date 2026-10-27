@@ -25,38 +25,22 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK packages
-        run: |
-          sdkmanager --install \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
-
-      - name: Verify Android SDK
-        run: |
-          sdkmanager --list_installed
-          echo "ANDROID_HOME=$ANDROID_HOME"
+        with:
+          packages: "platform-tools,platforms;android-35,build-tools;35.0.0"
 
       - name: Download Gradle 8.9
         run: |
-          curl -fsSL \
-            https://services.gradle.org/distributions/gradle-8.9-bin.zip \
-            -o /tmp/gradle.zip
+          curl -fsSL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
 
       - name: Verify project files
         run: |
           test -f settings.gradle.kts -o -f settings.gradle
           test -f app/build.gradle.kts -o -f app/build.gradle
-          echo "Android project files found."
 
       - name: Build debug APK
         run: |
-          /tmp/gradle-8.9/bin/gradle \
-            --no-daemon \
-            --stacktrace \
-            assembleDebug
+          /tmp/gradle-8.9/bin/gradle --no-daemon --stacktrace assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
